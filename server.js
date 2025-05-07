@@ -6,7 +6,9 @@ const db = require('./db');
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public')); // para servir o HTML
+app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// para servir o HTML
 
 // Registrar equipamento
 app.post('/equipamentos', (req, res) => {
