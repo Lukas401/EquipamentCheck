@@ -10,6 +10,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/img", express.static(path.join(__dirname, "img")));
 
 // para servir o HTML
 const storage = multer.diskStorage({
