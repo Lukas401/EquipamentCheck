@@ -45,7 +45,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
         }
         return res
           .status(500)
-          .json({ error: "Erro ao inserir equipamento: ".err.message });
+          .json({ error: "Erro ao inserir equipamento: " + err.message });
       }
       res.status(201).json({
         id: this.lastID,
