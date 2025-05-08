@@ -35,7 +35,7 @@ app.post('/equipamentos', upload.single ('foto'), (req, res) => {
       return res.status(400).json({ error: 'Tag ID já está em uso. Use um identificador único.' });
     }
     res.status(201).json({ 
-      id: this,lastID,
+      id: this.lastID,
       tagid,
       nome,
       equipamento,
