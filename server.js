@@ -31,6 +31,15 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
     VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?)
   `;
 
+  const fs = require("fs");
+  const path = require('path');
+
+  const uploadDir = path.join(__dirname, 'uploads');
+
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(upload);
+  }
+
   db.run(
     sql,
     [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto],

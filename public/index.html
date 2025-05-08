@@ -97,17 +97,25 @@
                     method: 'POST',
                     body: formData
                 })
-                
-                    .then(res => res.json())
+                    .then(res =>{
+                        console.log('status:', res.status);
+                        return res.text();
+                    })
                     .then(data => {
+                        console.log('Resposta:', data);
+                        try {
+                            const jsonData =JSON.parse(data);
+                            console.log('JSON:', jsonData);
+                        }catch (err){
+                            console.error('Erro ao analisar JSON:', err.message);
+                        }
+
                         gerarQRCode(data.tagid);
                         alert('Equipamento registrado com sucesso!');
                         document.getElementById('equipmentForm').reset();
                     })
                     .catch(err => alert('Erro ao salvar: ' + err.message));
-
             });
-
 
             //função para gerar o qrcode
             function gerarQRCode(valor) {
