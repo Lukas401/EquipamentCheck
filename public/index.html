@@ -65,26 +65,31 @@
         document.getElementById('equipmentForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const payload = {
-                nome: document.getElementById('nome').value,
-                equipamento: document.getElementById('equipamento').value,
-                modelo: document.getElementById('modelo').value,
-                fabricante: document.getElementById('fabricante').value,
-                tagid: document.getElementById('tagid').value
-            };
+            const formData = new formData();
+            formData.append('nome', document.getElementById('nome').value);
+            formData.append('equipamento', document.getElementById('equipamento').value);
+            formData.append('modelo', document.getElementById('modelo').value);
+            formData.append('fabricante', document.getElementById('fabricante').value);
+            formData.append('tagid', document.getElementById('tagid').value);
+
+            const fileInput = document.getElementById('foto');
+            if (fileInput.files.length > 0){
+                formData.append('foto', fileInput.files[0]);
+            }
 
             fetch('/equipamentos', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: formData
             })
-                .then(res => res.json())
-                .then(data => {
-                    gerarQRCode(payload.tagid);
-                    alert('Equipamento registrado com sucesso!');
-                    document.getElementById('equipmentForm').reset();
-                })
-                .catch(err => alert('Erro ao salvar: ' + err.message));
+
+            .then(res => res.json())
+            .then(data => {
+                gerarQRCode(document.getElementByID('tagid').value);
+                alert('Equipamento registrado com sucesso!');
+                document.getElementById('equipamentForm').reset();
+            })
+            .catch(err => alert('Erro ao salvar: ' + err.message));
+
         });
 
         function consultarEquipamento() {
