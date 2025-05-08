@@ -12,16 +12,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // para servir o HTML
 
 // Registrar equipamento
-app.post('/equipamentos', (req, res) => {
+app.post('/equipamentos', upload.single ('foto'), (req, res) => {
   const { nome, equipamento, modelo, fabricante, tagid } = req.body;
-  const dataEntrada = new Date().toLocaleString();
+  const foto = req.file ? `/uploads/${req.file.filename}` : null;
+  const dataEntrada = new Date().toISOString();
 
   const sql = `
     INSERT INTO equipamentos (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada)
     VALUES (?, ?, ?, ?, ?, 'Entrada', ?)
   `;
 
-  db.run(sql, [nome, equipamento, modelo, fabricante, tagid, dataEntrada], function (err) {
+  db.run(sql, [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto], function (err) {
     if (err) {
       return res.status(400).json({ error: 'Erro ao inserir equipamento ou Tag ID duplicado.' });
     }
