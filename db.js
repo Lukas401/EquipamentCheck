@@ -12,6 +12,7 @@ db.serialize(() => {
       tagid TEXT UNIQUE,
       status TEXT,
       dataEntrada TEXT
+      foto TEXT
     )
   `);
 });
