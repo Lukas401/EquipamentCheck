@@ -59,7 +59,7 @@
         </div>
 
         <div id="resultadoConsulta" class="alert alert-info d-none"></div>
-    </div>
+    </div>document.getElementById('equipmentForm').reset()
 
     <script>
         document.getElementById('equipmentForm').addEventListener('submit', function (e) {
@@ -77,7 +77,7 @@
                 formData.append('foto', fileInput.files[0]);
             }
 
-            fetch('/equipamentos', {
+            fetch('https://equipamentcheck.onrender.com/equipamentos', {
                 method: 'POST',
                 body: formData
             })
