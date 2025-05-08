@@ -11,7 +11,7 @@ db.serialize(() => {
       fabricante TEXT,
       tagid TEXT UNIQUE,
       status TEXT,
-      dataEntrada TEXT
+      dataEntrada TEXT,
       foto TEXT
     )
   `);
