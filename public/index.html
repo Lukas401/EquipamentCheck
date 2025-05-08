@@ -84,7 +84,7 @@
 
                 .then(res => res.json())
                 .then(data => {
-                    gerarQRCode(document.getElementById('tagid').value);
+                    gerarQRCode(data.tagid);
                     alert('Equipamento registrado com sucesso!');
                     document.getElementById('equipmentForm').reset();
                 })
@@ -92,11 +92,23 @@
 
         });
 
+
+        //função para gerar o qrcode
+        function gerarQRCode(valor){
+            const qr = new QRious({
+                element: document.getElementById('qrcode'),
+                value: valor,
+                size: 200
+            });
+        }
+
+        //unção para consultar equipamentos pelo id
+
         function consultarEquipamento() {
             const tag = document.getElementById('consultaTag').value;
             const divResultado = document.getElementById('resultadoConsulta');
 
-            fetch(`/equipamentos/${tag}`)
+            fetch(`https://equipamentcheck.onrender.com/equipamentos/${tag}`)
                 .then(res => res.json())
                 .then(resultado => {
                     if (resultado.error) {
@@ -111,6 +123,8 @@
           <strong>Responsável:</strong> ${resultado.nome}<br/>
           <strong>Data Entrada:</strong> ${resultado.dataEntrada}<br/>
           <strong>Status:</strong> ${resultado.status}
+          <strong>Foto:</strong> <br/>
+          <img src="${resultado.foto}" alt="Foto do Equipamento" style="max-width: 200px; max-height: 200px;"/>
         `;
                     }
                 })
