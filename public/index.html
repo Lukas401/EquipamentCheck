@@ -84,9 +84,9 @@
 
                 .then(res => res.json())
                 .then(data => {
-                    gerarQRCode(document.getElementByID('tagid').value);
+                    gerarQRCode(document.getElementById('tagid').value);
                     alert('Equipamento registrado com sucesso!');
-                    document.getElementById('equipamentForm').reset();
+                    document.getElementById('equipmentForm').reset();
                 })
                 .catch(err => alert('Erro ao salvar: ' + err.message));
 
