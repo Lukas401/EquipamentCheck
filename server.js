@@ -3,13 +3,21 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const db = require('./db');
+const multer = require ('multer');
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // para servir o HTML
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb (null, Date.now() + '-' + file.originalname)
+});
+
+const upload = multer ({ storage });
 
 // Registrar equipamento
 app.post('/equipamentos', upload.single ('foto'), (req, res) => {
@@ -18,8 +26,8 @@ app.post('/equipamentos', upload.single ('foto'), (req, res) => {
   const dataEntrada = new Date().toISOString();
 
   const sql = `
-    INSERT INTO equipamentos (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada)
-    VALUES (?, ?, ?, ?, ?, 'Entrada', ?)
+    INSERT INTO equipamentos (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada, foto)
+    VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?)
   `;
 
   db.run(sql, [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto], function (err) {
