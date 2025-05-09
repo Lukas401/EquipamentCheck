@@ -15,11 +15,9 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center">
-                <img src="/img/1746715597143-Captura de tela 2025-04-11 132753.png"
-                alt="Bracell-logo"
-                style="width: 150px; height: auto;"
-                class="me-3">
-                
+                <img src="/img/1746715597143-Captura de tela 2025-04-11 132753.png" alt="Bracell-logo"
+                    style="width: 150px; height: auto;" class="me-3">
+
             </div>
 
             <button type="button" class="btn btn-primary" onclick="window.location.href='consulta.html'">
@@ -31,116 +29,113 @@
 
         <h1 class="mb-4 text-center">Controle de Entrada de Equipamentos</h1>
 
-            <form id="equipmentForm" class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Nome do Responsável</label>
-                    <input type="text" class="form-control" id="nome" required />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Equipamento</label>
-                    <input type="text" class="form-control" id="equipamento" required />
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Modelo</label>
-                    <input type="text" class="form-control" id="modelo" required />
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Fabricante</label>
-                    <input type="text" class="form-control" id="fabricante" required />
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Tag ID</label>
-                    <input type="text" class="form-control" id="tagid" placeholder="Digite o Tag ID BRACELL" required />
-                </div>
+        <form id="equipmentForm" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Nome do Responsável</label>
+                <input type="text" class="form-control" id="nome" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Equipamento</label>
+                <input type="text" class="form-control" id="equipamento" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="modelo" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Fabricante</label>
+                <input type="text" class="form-control" id="fabricante" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Tag ID</label>
+                <input type="text" class="form-control" id="tagid" placeholder="Digite o Tag ID BRACELL" required />
+            </div>
 
-                <div class="col-md-4">
-                    <label class="form-label">Serial</label>
-                    <input type="text" class="form-control" id="serial" placeholder="Digite o serial do EQUIPAMENTO"
-                        required />
-                </div>
+            <div class="col-md-4">
+                <label class="form-label">Serial</label>
+                <input type="text" class="form-control" id="serial" placeholder="Digite o serial do EQUIPAMENTO"
+                    required />
+            </div>
 
-                <div class="col-md4">
-                    <label for="form-label" for="foto">Foto do equipamento</label>
-                    <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required />
-                </div>
+            <div class="col-md4">
+                <label for="form-label" for="foto">Foto do equipamento</label>
+                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required />
+            </div>
 
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Registrar Entrada</button>
-                </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Registrar Entrada</button>
+            </div>
 
-            </form>
+        </form>
 
-            <hr class="my-4" />
+        <hr class="my-4" />
 
-            <h4>QR Code do Equipamento</h4>
-            <canvas id="qrcode"></canvas>
-        </div>
+        <h4>QR Code do Equipamento</h4>
+        <canvas id="qrcode"></canvas>
+    </div>
 
-        <script>
-            document.getElementById('equipmentForm').addEventListener('submit', function (e) {
-                e.preventDefault();
+    <script>
+        document.getElementById('equipmentForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-                const formData = new FormData();
-                formData.append('nome', document.getElementById('nome').value);
-                formData.append('equipamento', document.getElementById('equipamento').value);
-                formData.append('modelo', document.getElementById('modelo').value);
-                formData.append('fabricante', document.getElementById('fabricante').value);
-                formData.append('tagid', document.getElementById('tagid').value);
-                formData.append('serial', document.getElementById('serial').value);
+            const formData = new FormData();
+            formData.append('nome', document.getElementById('nome').value);
+            formData.append('equipamento', document.getElementById('equipamento').value);
+            formData.append('modelo', document.getElementById('modelo').value);
+            formData.append('fabricante', document.getElementById('fabricante').value);
+            formData.append('tagid', document.getElementById('tagid').value);
+            formData.append('serial', document.getElementById('serial').value);
 
-                const fileInput = document.getElementById('foto');
-                if (fileInput.files.length > 0) {
-                    formData.append('foto', fileInput.files[0]);
-                }
-                
-                fetch('https://equipamentcheck.onrender.com/equipamentos', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(res =>{
-                        console.log('status:', res.status);
-                        return res.text();
-                    })
-                    .then(data => {
-                        console.log('Resposta:', data);
-                        try {
-                            const jsonData =JSON.parse(data);
-                            console.log('JSON:', jsonData);
-                        }catch (err){
-                            console.error('Erro ao analisar JSON:', err.message);
-                        }
-
-                        gerarQRCode(data.tagid);
-                        alert('Equipamento registrado com sucesso!');
-                        document.getElementById('equipmentForm').reset();
-                    })
-                    .catch(err => alert('Erro ao salvar: ' + err.message));
-            });
-
-            //função para gerar o qrcode
-            function gerarQRCode(valor) {
-                const qr = new QRious({
-                    element: document.getElementById('qrcode'),
-                    value: valor,
-                    size: 200
-                });
+            const fileInput = document.getElementById('foto');
+            if (fileInput.files.length > 0) {
+                formData.append('foto', fileInput.files[0]);
             }
 
-            //unção para consultar equipamentos pelo id
+            fetch('https://equipamentcheck.onrender.com/equipamentos', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => {
+                    console.log('Status:', res.status);
+                    return res.text(); 
+                })
+                .then(data => {
+                    console.log('Resposta completa:', data);
+                    try {
+                        const jsonData = JSON.parse(data); 
+                        console.log('JSON:', jsonData);
+                    } catch (err) {
+                        console.error('Erro ao parsear JSON:', err.message);
+                    }
+                })
+                .catch(err => console.error('Erro no Fetch:', err.message));
 
-            function consultarEquipamento() {
-                const tag = document.getElementById('consultaTag').value;
-                const divResultado = document.getElementById('resultadoConsulta');
+        });
 
-                fetch(`https://equipamentcheck.onrender.com/equipamentos/${tag}`)
-                    .then(res => res.json())
-                    .then(resultado => {
-                        if (resultado.error) {
-                            divResultado.classList.remove('d-none');
-                            divResultado.innerHTML = resultado.error;
-                        } else {
-                            divResultado.classList.remove('d-none');
-                            divResultado.innerHTML = `
+        //função para gerar o qrcode
+        function gerarQRCode(valor) {
+            const qr = new QRious({
+                element: document.getElementById('qrcode'),
+                value: valor,
+                size: 200
+            });
+        }
+
+        //unção para consultar equipamentos pelo id
+
+        function consultarEquipamento() {
+            const tag = document.getElementById('consultaTag').value;
+            const divResultado = document.getElementById('resultadoConsulta');
+
+            fetch(`https://equipamentcheck.onrender.com/equipamentos/${tag}`)
+                .then(res => res.json())
+                .then(resultado => {
+                    if (resultado.error) {
+                        divResultado.classList.remove('d-none');
+                        divResultado.innerHTML = resultado.error;
+                    } else {
+                        divResultado.classList.remove('d-none');
+                        divResultado.innerHTML = `
           <strong>Equipamento:</strong> ${resultado.equipamento}<br/>
           <strong>Modelo:</strong> ${resultado.modelo}<br/>
           <strong>Fabricante:</strong> ${resultado.fabricante}<br/>
@@ -151,14 +146,13 @@
           <strong>Foto:</strong> <br/>
           <img src="${resultado.foto}" alt="Foto do Equipamento" style="max-width: 200px; max-height: 200px;"/>
         `;
-                        }
-                    })
-                    .catch(err => alert('Erro ao consultar: ' + err.message));
-            }
+                    }
+                })
+                .catch(err => alert('Erro ao consultar: ' + err.message));
+        }
 
-        </script>
+    </script>
 
 </body>
 
 </html>
-
