@@ -12,7 +12,16 @@ app.use(express.static("public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/img", express.static(path.join(__dirname, "img")));
 
+
+//caminho para pasta de uploads
+const uploadDir = path.join(__dirname, "uploads");
+
+// Verifica se o diretório de upload existe, se não, cria
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 // para servir o HTML
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
@@ -31,15 +40,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
     VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?)
   `;
 
-  const fs = require("fs");
-  const path = require('path');
-
-  const uploadDir = path.join(__dirname, 'uploads');
-
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(upload);
-  }
-
+  
   db.run(
     sql,
     [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto],
@@ -80,7 +81,7 @@ app.get("/equipamentos/:tagid", (req, res) => {
   });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;;
 app.listen(PORT, () =>
   console.log(`Servidor rodando em http://localhost:${PORT}`)
 );
