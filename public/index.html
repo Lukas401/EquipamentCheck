@@ -76,41 +76,46 @@
 
     <script>
         document.getElementById('equipmentForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+    e.preventDefault();
 
-            const formData = new FormData();
-            formData.append('nome', document.getElementById('nome').value);
-            formData.append('equipamento', document.getElementById('equipamento').value);
-            formData.append('modelo', document.getElementById('modelo').value);
-            formData.append('fabricante', document.getElementById('fabricante').value);
-            formData.append('tagid', document.getElementById('tagid').value);
-            formData.append('serial', document.getElementById('serial').value);
+    const button = document.querySelector('button[type="submit"]');
+    button.disabled = true;
+    const originalText = button.innerHTML;
+    button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registrando...`;
 
-            const fileInput = document.getElementById('foto');
-            if (fileInput.files.length > 0) {
-                formData.append('foto', fileInput.files[0]);
-            }
+    const formData = new FormData();
+    formData.append('nome', document.getElementById('nome').value);
+    formData.append('equipamento', document.getElementById('equipamento').value);
+    formData.append('modelo', document.getElementById('modelo').value);
+    formData.append('fabricante', document.getElementById('fabricante').value);
+    formData.append('tagid', document.getElementById('tagid').value);
+    formData.append('serial', document.getElementById('serial').value);
 
-            fetch('https://equipamentcheck.onrender.com/equipamentos', {
-                method: 'POST',
-                body: formData
-            })
-                .then(res => {
-                    console.log('Status:', res.status);
-                    return res.text(); 
-                })
-                .then(data => {
-                    console.log('Resposta completa:', data);
-                    try {
-                        const jsonData = JSON.parse(data); 
-                        console.log('JSON:', jsonData);
-                    } catch (err) {
-                        console.error('Erro ao parsear JSON:', err.message);
-                    }
-                })
-                .catch(err => console.error('Erro no Fetch:', err.message));
+    const fileInput = document.getElementById('foto');
+    if (fileInput.files.length > 0) {
+        formData.append('foto', fileInput.files[0]);
+    }
 
-        });
+    fetch('https://equipamentcheck.onrender.com/equipamentos', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json().then(data => ({ status: res.status, body: data })))
+    .then(({ status, body }) => {
+        if (status === 201) {
+            alert('Equipamento registrado com sucesso!');
+            gerarQRCode(body.tagid);
+            document.getElementById('equipmentForm').reset();
+        } else {
+            alert('Erro: ' + body.error);
+        }
+    })
+    .catch(err => alert('Erro no Fetch: ' + err.message))
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    });
+});
 
         //função para gerar o qrcode
         function gerarQRCode(valor) {
