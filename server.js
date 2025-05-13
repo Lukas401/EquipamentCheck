@@ -13,16 +13,15 @@ app.use(express.static("public"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/img", express.static(path.join(__dirname, "img")));
 
-
-//caminho para pasta de uploads
+// Caminho para pasta de uploads
 const uploadDir = path.join(__dirname, "uploads");
 
 // Verifica se o diretório de upload existe, se não, cria
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
-// para servir o HTML
 
+// Configuração do storage do multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
@@ -41,23 +40,27 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
     VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?)
   `;
 
-  
   db.run(
     sql,
     [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto],
     function (err) {
       if (err) {
-        if (err.message.includes("Unique constraint failed")) {
-          return res
-            .status(400)
-            .json({
-              error: "Tag ID já está em uso. Use um identificador único.",
-            });
+        console.error("Erro ao inserir no banco:", err.message);
+
+        // Tratamento específico para erro de chave duplicada
+        if (err.message.includes("UNIQUE constraint failed: equipamentos.tagid")) {
+          return res.status(400).json({
+            error: "Tag ID já cadastrado. Por favor, insira um identificador único.",
+          });
         }
-        return res
-          .status(500)
-          .json({ error: "Erro ao inserir equipamento: " + err.message });
+
+        // Tratamento para outros erros
+        return res.status(500).json({
+          error: "Erro ao inserir equipamento: " + err.message,
+        });
       }
+
+      // Caso não ocorra erro, retorna os dados inseridos
       res.status(201).json({
         id: this.lastID,
         tagid,
@@ -82,7 +85,7 @@ app.get("/equipamentos/:tagid", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Servidor rodando em http://localhost:${PORT}`)
 );

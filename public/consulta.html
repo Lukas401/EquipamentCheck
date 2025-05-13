@@ -38,6 +38,38 @@
         <div id="resultadoConsulta" class="alert alert-info d-none"></div>
     </div>
 
+    <script>
+
+        //função para consultar equipamentos pelo id
+        function consultarEquipamento() {
+            const tag = document.getElementById('consultaTag').value;
+            const divResultado = document.getElementById('resultadoConsulta');
+
+            fetch(`https://equipamentcheck.onrender.com/equipamentos/${tag}`)
+                .then(res => res.json())
+                .then(resultado => {
+                    if (resultado.error) {
+                        divResultado.classList.remove('d-none');
+                        divResultado.innerHTML = resultado.error;
+                    } else {
+                        divResultado.classList.remove('d-none');
+                        divResultado.innerHTML = `
+          <strong>Equipamento:</strong> ${resultado.equipamento}<br/>
+          <strong>Modelo:</strong> ${resultado.modelo}<br/>
+          <strong>Fabricante:</strong> ${resultado.fabricante}<br/>
+          <strong>Serial:</strong> ${resultado.serial}<br/>
+          <strong>Responsável:</strong> ${resultado.nome}<br/>
+          <strong>Data Entrada:</strong> ${resultado.dataEntrada}<br/>
+          <strong>Status:</strong> ${resultado.status}
+          <strong>Foto:</strong> <br/>
+          <img src="${resultado.foto}" alt="Foto do Equipamento" style="max-width: 200px; max-height: 200px;"/>
+        `;
+                    }
+                })
+                .catch(err => alert('Erro ao consultar: ' + err.message));
+        }
+    </script>
+
 </body>
 
 </html>

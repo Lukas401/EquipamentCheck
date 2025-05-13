@@ -8,6 +8,8 @@
     <title>BSCEQUIP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-light">
@@ -74,88 +76,88 @@
         <canvas id="qrcode"></canvas>
     </div>
 
+
     <script>
         document.getElementById('equipmentForm').addEventListener('submit', function (e) {
-    e.preventDefault();
+            e.preventDefault();
 
-    const button = document.querySelector('button[type="submit"]');
-    button.disabled = true;
-    const originalText = button.innerHTML;
-    button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registrando...`;
+            const button = document.querySelector('button[type="submit"]');
+            button.disabled = true;
+            const originalText = button.innerHTML;
+            button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registrando...`;
 
-    const formData = new FormData();
-    formData.append('nome', document.getElementById('nome').value);
-    formData.append('equipamento', document.getElementById('equipamento').value);
-    formData.append('modelo', document.getElementById('modelo').value);
-    formData.append('fabricante', document.getElementById('fabricante').value);
-    formData.append('tagid', document.getElementById('tagid').value);
-    formData.append('serial', document.getElementById('serial').value);
+            const formData = new FormData();
+            formData.append('nome', document.getElementById('nome').value);
+            formData.append('equipamento', document.getElementById('equipamento').value);
+            formData.append('modelo', document.getElementById('modelo').value);
+            formData.append('fabricante', document.getElementById('fabricante').value);
+            formData.append('tagid', document.getElementById('tagid').value);
+            formData.append('serial', document.getElementById('serial').value);
 
-    const fileInput = document.getElementById('foto');
-    if (fileInput.files.length > 0) {
-        formData.append('foto', fileInput.files[0]);
-    }
+            const fileInput = document.getElementById('foto');
+            if (fileInput.files.length > 0) {
+                formData.append('foto', fileInput.files[0]);
+            }
 
-    fetch('https://equipamentcheck.onrender.com/equipamentos', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json().then(data => ({ status: res.status, body: data })))
-    .then(({ status, body }) => {
-        if (status === 201) {
-            alert('Equipamento registrado com sucesso!');
-            gerarQRCode(body.tagid);
-            document.getElementById('equipmentForm').reset();
-        } else {
-            alert('Erro: ' + body.error);
-        }
-    })
-    .catch(err => alert('Erro no Fetch: ' + err.message))
-    .finally(() => {
-        button.disabled = false;
-        button.innerHTML = originalText;
-    });
-});
+            fetch('https://equipamentcheck.onrender.com/equipamentos', {
+                method: 'POST',
+                body: formData
+            })
+                .then(async (res) => {
+                    const data = await res.json();
 
-        //função para gerar o qrcode
-        function gerarQRCode(valor) {
-            const qr = new QRious({
-                element: document.getElementById('qrcode'),
-                value: valor,
-                size: 200
-            });
-        }
+                    if (!res.ok) {  
+                        // Tratamento do erro 400 (tagid duplicado)
+                        if (res.status === 400 && data.error.includes("Tag ID já está em uso")) {
+                            return Swal.fire({
+                                icon: "error",
+                                title: "Erro!",
+                                text: "Equipamento já registrado!",
+                                footer: '<a href="consulta.html">Clique aqui para consultar</a>'
+                            });
+                        } return Swal.fire({
+                                icon: "error",
+                                title: "Erro!",
+                                text: data.error || "Erro desconhecido."
+                            });
+                        }
+                       
+                    
+                    // Se o cadastro for bem-sucedido
+                    Swal.fire({
+                        icon: "success",
+                        title: "Sucesso!",
+                        text: "Equipamento registrado com sucesso!"
+                    });
 
-        //unção para consultar equipamentos pelo id
-
-        function consultarEquipamento() {
-            const tag = document.getElementById('consultaTag').value;
-            const divResultado = document.getElementById('resultadoConsulta');
-
-            fetch(`https://equipamentcheck.onrender.com/equipamentos/${tag}`)
-                .then(res => res.json())
-                .then(resultado => {
-                    if (resultado.error) {
-                        divResultado.classList.remove('d-none');
-                        divResultado.innerHTML = resultado.error;
-                    } else {
-                        divResultado.classList.remove('d-none');
-                        divResultado.innerHTML = `
-          <strong>Equipamento:</strong> ${resultado.equipamento}<br/>
-          <strong>Modelo:</strong> ${resultado.modelo}<br/>
-          <strong>Fabricante:</strong> ${resultado.fabricante}<br/>
-          <strong>Serial:</strong> ${resultado.serial}<br/>
-          <strong>Responsável:</strong> ${resultado.nome}<br/>
-          <strong>Data Entrada:</strong> ${resultado.dataEntrada}<br/>
-          <strong>Status:</strong> ${resultado.status}
-          <strong>Foto:</strong> <br/>
-          <img src="${resultado.foto}" alt="Foto do Equipamento" style="max-width: 200px; max-height: 200px;"/>
-        `;
-                    }
+                    gerarQRCode(data.tagid);
+                    document.getElementById('equipmentForm').reset();
                 })
-                .catch(err => alert('Erro ao consultar: ' + err.message));
-        }
+                .catch((err) => {
+                    Swal.fire({
+                        icon:"error",
+                        title:"Erro de conexão",
+                        text: err.message || "Erro desconhecido."
+                    });
+                    
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                });
 
+
+
+            //função para gerar o qrcode
+            function gerarQRCode(valor) {
+                const qr = new QRious({
+                    element: document.getElementById('qrcode'),
+                    value: valor,
+                    size: 200
+                });
+            }
+        });
+    
     </script>
 
 </body>
