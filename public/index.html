@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="/img/icon_d7579ad21ad9d58669ab6386f1721014.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="img/icon_d7579ad21ad9d58669ab6386f1721014.ico" type="image/x-icon">
     <title>BSCEQUIP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -17,9 +17,11 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center">
-                <img src="/img/1746715597143-Captura de tela 2025-04-11 132753.png" alt="Bracell-logo"
-                    style="width: 150px; height: auto;" class="me-3">
-
+                <a href="index.html">
+                    <img src="img/1746715597143-Captura de tela 2025-04-11 132753.png" alt="Bracell-logo"
+                        style="width: 150px; height: auto;" class="me-3">
+                </a>
+                </a>
             </div>
 
             <button type="button" class="btn btn-primary" onclick="window.location.href='consulta.html'">
@@ -99,31 +101,45 @@
                 formData.append('foto', fileInput.files[0]);
             }
 
-            fetch('https://equipamentcheck.onrender.com/equipamentos', {
+            fetch('/equipamentos', {
+
                 method: 'POST',
                 body: formData
             })
                 .then(async (res) => {
                     const data = await res.json();
 
-                    if (!res.ok) {  
-                        // Tratamento do erro 400 (tagid duplicado)
+                    if (!res.ok) {
+                        // Se for 400 e for erro de UNIQUE constraint, exibe o alerta com link
                         if (res.status === 400 && data.error.includes("Tag ID já está em uso")) {
                             return Swal.fire({
                                 icon: "error",
                                 title: "Erro!",
                                 text: "Equipamento já registrado!",
-                                footer: '<a href="consulta.html">Clique aqui para consultar</a>'
-                            });
-                        } return Swal.fire({
-                                icon: "error",
-                                title: "Erro!",
-                                text: data.error || "Erro desconhecido."
+                                footer: `
+                                <a
+                                        href="consulta.html"
+                                        class="text-primary fw-bold mt-3 d-inline-block"
+                                        style="text-decoration: none;"
+                                        onmouseover="this.classList.add('text-decoration-underline')"
+                                        onmouseout="this.classList.remove('text-decoration-underline')"
+
+                                >
+                                Clique Aqui para consultar
+                                </a>
+                                         `
                             });
                         }
-                       
-                    
-                    // Se o cadastro for bem-sucedido
+
+                        // Caso contrário, exibe o alerta genérico
+                        return Swal.fire({
+                            icon: "error",
+                            title: "Erro!",
+                            text: data.error || "Erro desconhecido."
+                        });
+                    }
+
+                    // Se chegou aqui, cadastro foi bem-sucedido
                     Swal.fire({
                         icon: "success",
                         title: "Sucesso!",
@@ -135,16 +151,16 @@
                 })
                 .catch((err) => {
                     Swal.fire({
-                        icon:"error",
-                        title:"Erro de conexão",
+                        icon: "error",
+                        title: "Erro de conexão",
                         text: err.message || "Erro desconhecido."
                     });
-                    
                 })
                 .finally(() => {
                     button.disabled = false;
                     button.innerHTML = originalText;
                 });
+
 
 
 
@@ -157,7 +173,7 @@
                 });
             }
         });
-    
+
     </script>
 
 </body>
