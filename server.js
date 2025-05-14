@@ -5,8 +5,8 @@ const path = require("path");
 const db = require("./db");
 const multer = require("multer");
 const fs = require("fs");
-
 const app = express();
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -50,7 +50,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
         // Tratamento específico para erro de chave duplicada
         if (err.message.includes("UNIQUE constraint failed: equipamentos.tagid")) {
           return res.status(400).json({
-            error: "Tag ID já cadastrado. Por favor, insira um identificador único.",
+            error: "Tag ID já está em uso. Use um identificador único.",
           });
         }
 
