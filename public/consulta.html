@@ -7,7 +7,11 @@
     <link rel="shortcut icon" href="img/icon_d7579ad21ad9d58669ab6386f1721014.ico" type="image/x-icon">
     <title>Controle de Equipamentos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body class="bg-light">
@@ -28,49 +32,193 @@
             </button>
         </div>
 
-        <hr>
-
         <h1 class="mb-4 text-center">Consulta de Equipamento Registrado</h1>
 
-        <div class="input-group mb-3">
-            <input type="text" id="consultaTag" class="form-control" placeholder="Digite o Tag ID" />
-            <button class="btn btn-outline-secondary" onclick="consultarEquipamento()">Consultar</button>
+        <hr>
+        <br>
+
+        <ul class="nav nav-tabs" id="consultaTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual-pane"
+                    type="button" role="tab">
+                    Manual
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="qr-tab" data-bs-toggle="tab" data-bs-target="#qr-pane" type="button"
+                    role="tab">
+                    QR Code
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="barcode-tab" data-bs-toggle="tab" data-bs-target="#barcode-pane"
+                    type="button" role="tab">
+                    Código de Barras
+                </button>
+            </li>
+        </ul>
+
+        <!-- Conteúdo das abas -->
+        <div class="tab-content mt-3" id="consultaTabsContent">
+
+            <!-- 1) Manual -->
+            <div class="tab-pane fade show active" id="manual-pane" role="tabpanel" aria-labelledby="manual-tab">
+                <div class="input-group mb-3">
+                    <input type="text" id="consultaTag" class="form-control" placeholder="Digite o Tag ID" />
+                    <button class="btn btn-primary" onclick="consultarManual()">
+                        Consultar
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2) QR Code -->
+            <div class="tab-pane fade" id="qr-pane" role="tabpanel" aria-labelledby="qr-tab">
+                <div id="reader" style="width:100%; max-width:500px;"></div>
+                <button class="btn btn-sm btn-outline-secondary mt-2" onclick="stopQrScan()">
+                    Parar Scanner
+                </button>
+            </div>
+
+            <!-- 3) Código de Barras -->
+            <div class="tab-pane fade" id="barcode-pane" role="tabpanel" aria-labelledby="barcode-tab">
+                <div id="barcodeReader" style="width:100%; max-width:500px;"></div>
+                <button class="btn btn-sm btn-outline-secondary mt-2" onclick="stopBarcodeScan()">
+                    Parar Scanner
+                </button>
+            </div>
+
         </div>
 
-        <div id="resultadoConsulta" class="alert alert-info d-none"></div>
+        <!-- Resultado Único -->
+        <div id="resultadoConsulta" class="alert alert-info d-none mt-4"></div>
+    </div>
     </div>
 
     <script>
 
-        //função para consultar equipamentos pelo id
-        function consultarEquipamento() {
-            const tag = document.getElementById('consultaTag').value;
-            const divResultado = document.getElementById('resultadoConsulta');
+        //consulta manual
+        function consultarManual() {
+            const tag = document.getElementById('consultaTag').value.trim();
+            if (!tag) return alert('Digite um Tag ID');
+            consultaPorTag(tag);
+        }
 
+        //função comum para chamar a API e exibir
+        function consultaPorTag(tag) {
+            const div = document.getElementById('resultadoConsulta');
             fetch(`/equipamentos/${tag}`)
                 .then(res => res.json())
                 .then(resultado => {
+                    div.classList.remove('d-none');
                     if (resultado.error) {
-                        divResultado.classList.remove('d-none');
-                        divResultado.innerHTML = resultado.error;
+                        div.innerHTML = ` <div class ="text-danger">${resultado.error}</div>`;
                     } else {
-                        divResultado.classList.remove('d-none');
-                        divResultado.innerHTML = `
-          <strong>Equipamento:</strong> ${resultado.equipamento}<br/>
+                        div.innerHTML = `
+                        <strong>Equipamento:</strong> ${resultado.equipamento}<br/>
           <strong>Modelo:</strong> ${resultado.modelo}<br/>
           <strong>Fabricante:</strong> ${resultado.fabricante}<br/>
-          <strong>Serial:</strong> ${resultado.serial}<br/>
+          <strong>Serial:</strong> ${resultado.serial || 'N/A'}<br/>
           <strong>Responsável:</strong> ${resultado.nome}<br/>
           <strong>Data Entrada:</strong> ${resultado.dataEntrada}<br/>
-          <strong>Status:</strong> 
-          ${resultado.status}
-          <strong>Foto:</strong> <br/>
-          <img src="http://localhost:3000${resultado.foto}" alt="Foto do Equipamento" style="max-width: 200px; max-height: 200px;" />
-        `;
+          <strong>Status:</strong> ${resultado.status}<br/>
+          <strong>Foto:</strong><br/>
+          <img src="${resultado.foto}" alt="Foto" class="img-fluid mb-2"/><br/>
+          <strong>QR Code:</strong><br/>
+          <canvas id="qrcodeConsulta"></canvas><br/>
+          <strong>Código de Barras:</strong><br/>
+          <svg id="barcodeConsulta"></svg>
+                    `;
+
+                        new QRious({
+                            element: d = document.getElementById('qrcodeConsulta'),
+                            value: tag,
+                            size: 200
+                        });
+
+                        JsBarcode("#barcodeConsulta", tag, {
+                            format: "CODE128",
+                            width: 2,
+                            height: 50,
+                            displayValue: true
+                        });
                     }
                 })
-                .catch(err => alert('Erro ao consultar: ' + err.message));
+                .catch(err => {
+                    div.classList.remove('d-none');
+                    div.innerHTML = `<div class="text-danger"> Erro na consulta: ${err.message}</div>`;
+                });
         }
+
+        //Qr Code Scanner
+        let html5qrcodeScanner;
+        function startQrScan() {
+            html5qrcodeScanner = new Html5Qrcode("reader");
+            html5qrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodeText) => {
+                    stopQrScan();
+                    consultaPorTag(decodeText);
+                    // Volta para aba manual se quiser
+                    new bootstrap.Tab(document.querySelector('#manual-tab')).show();
+                },
+                (error) => {
+                    console.log("Qr error", error);
+                }
+            );
+        }
+
+        //parar
+        function stopQrScan() {
+            html5qrcodeScanner && html5qrcodeScanner.stop();
+        }
+
+        //Barcode Scanner 
+        function startBarcodeScan() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#barcodeReader'),
+                    constraints: { facingMode: "environment" }
+                },
+                decoder: {
+                    readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader"]
+                }
+            }, err => {
+                if (err) return console.err(err);
+                Quagga.start();
+            });
+
+            Quagga.onDetected(data => {
+                const code = data.codeResult.code;
+                stopBarcodeScan();
+                consultaPorTag(code);
+                new bootstrap.Tab(document.querySelector('#manual-tab')).show();
+            });
+        }
+        function stopBarcodeScan() {
+            Quagga.stop();
+        }
+
+
+        //Movimentação ao trocar de abas
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            //Quando a aba QR estiver mostrada
+            document.getElementById('qr-tab')
+                .addEventListener('shown.bs.tab', () => {
+                    startQrScan();
+                });
+            //quando a aba Bar code estiver mostrada
+            document.getElementById('barcode-tab')
+                .addEventListener('shown.bs.tab', () => {
+                    startBarcodeScan();
+                });
+        });
+
+        
     </script>
 
 </body>
