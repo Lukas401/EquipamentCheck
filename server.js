@@ -31,18 +31,18 @@ const upload = multer({ storage });
 
 // Registrar equipamento
 app.post("/equipamentos", upload.single("foto"), (req, res) => {
-  const { nome, equipamento, modelo, fabricante, tagid } = req.body;
+  const { nome, equipamento, modelo, fabricante, tagid, serial } = req.body;
   const foto = req.file ? `/uploads/${req.file.filename}` : null;
   const dataEntrada = new Date().toISOString();
 
   const sql = `
-    INSERT INTO equipamentos (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada, foto)
-    VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?)
+    INSERT INTO equipamentos (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada, foto, serial)
+    VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?, ?)
   `;
 
   db.run(
     sql,
-    [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto],
+    [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto, serial],
     function (err) {
       if (err) {
         console.error("Erro ao inserir no banco:", err.message);
@@ -69,6 +69,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
         modelo,
         fabricante,
         foto,
+        serial,
       });
     }
   );
