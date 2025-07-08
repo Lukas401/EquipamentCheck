@@ -29,6 +29,46 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+const PREFIXES = {
+  Notebook: 'NB',
+  Desktop: 'DT',
+  Monitor: 'MN',
+  Impressora: 'IM',
+  Celular: 'CE',
+  Tablet: 'TB',
+  Teclado: 'TC',
+  Mouse: 'MS',
+  Webcam: 'WC',
+  'Fone de Ouvido': 'FO',
+  Carregador: 'CG',
+  'HD Externo': 'HE',
+  'Pen Drive': 'PD',
+  'Chave de fenda / Philips': 'CF',
+  Furadeira: 'FD',
+  Parafusadeira: 'PF',
+  'Serra Elétrica': 'SE',
+  Martelo: 'MA',
+  Alicate: 'AL',
+  Outros: 'OT',
+};
+
+app.get('/next-tagid/:equipamento', (req, res) => {
+  const equipamento = req.params.equipamento;
+  const prefix = PREFIXES[equipamento] || equipamento.slice(0, 2).toUpperCase();
+  const sql =
+    'SELECT tagid FROM equipamentos WHERE tagid LIKE ? ORDER BY id DESC LIMIT 1';
+  db.get(sql, [prefix + '%'], (err, row) => {
+    if (err) return res.status(500).json({ error: 'Erro ao consultar banco' });
+    let next = 1;
+    if (row && row.tagid) {
+      const n = parseInt(row.tagid.slice(prefix.length), 10);
+      if (!isNaN(n)) next = n + 1;
+    }
+    const tagid = prefix + String(next).padStart(3, '0');
+    res.json({ tagid });
+  });
+});
+
 // Registrar equipamento
 app.post("/equipamentos", upload.single("foto"), (req, res) => {
   const { nome, equipamento, modelo, fabricante, tagid, serial } = req.body;

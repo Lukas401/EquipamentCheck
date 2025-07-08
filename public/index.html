@@ -92,33 +92,35 @@
                     </optgroup>
                 </select>
             </div>
+            <div id="extraFields" style="display:none;" class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">Modelo</label>
-                <input type="text" class="form-control" id="modelo" required />
+                <input type="text" class="form-control" id="modelo" disabled required />
             </div>
             <div class="col-md-4">
                 <label class="form-label">Fabricante</label>
-                <input type="text" class="form-control" id="fabricante" required />
+                <input type="text" class="form-control" id="fabricante" disabled required />
             </div>
             <div class="col-md-4">
                 <label class="form-label">Tag ID</label>
-                <input type="text" class="form-control" id="tagid" placeholder="Digite o Tag ID BRACELL" required />
+                <input type="text" class="form-control" id="tagid" readonly disabled required />
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Serial</label>
                 <input type="text" class="form-control" id="serial" placeholder="Digite o serial do EQUIPAMENTO"
-                    required />
+                    disabled required />
             </div>
 
             <div class="col-md4">
                 <label for="form-label" for="foto">Foto do equipamento</label>
-                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required />
+                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" disabled required />
             </div>
 
             <div class="col-12">
-                <button type="submit" class="btn btn-primary">Registrar Entrada</button>
+                <button type="submit" class="btn btn-primary" disabled>Registrar Entrada</button>
 
+            </div>
             </div>
 
         </form>
@@ -137,6 +139,19 @@
 
 
     <script>
+        const equipSelect = document.getElementById('equipamento');
+        const extraFields = document.getElementById('extraFields');
+        equipSelect.addEventListener('change', () => {
+            extraFields.style.display = '';
+            extraFields.querySelectorAll('input, button').forEach(el => el.disabled = false);
+            fetch(`https://equipamentcheck.onrender.com/next-tagid/${encodeURIComponent(equipSelect.value)}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('tagid').value = data.tagid;
+                })
+                .catch(err => console.error(err));
+        });
+
         document.getElementById('equipmentForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
