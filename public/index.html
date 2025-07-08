@@ -102,7 +102,7 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Tag ID</label>
-                <input type="text" class="form-control" id="tagid" placeholder="Digite o Tag ID BRACELL" required />
+                <input type="text" class="form-control" id="tagid" placeholder="Deixe em branco para gerar automaticamente" />
             </div>
 
             <div class="col-md-4">
@@ -191,6 +191,7 @@
 
                     gerarQRCode(data.tagid);
                     document.getElementById('equipmentForm').reset();
+                    document.getElementById('tagid').value = data.tagid;
                 })
                 .catch((err) => {
                     Swal.fire({

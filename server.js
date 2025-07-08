@@ -7,6 +7,10 @@ const multer = require("multer");
 const fs = require("fs");
 const app = express();
 
+function generateTagId() {
+  return `TAG${Date.now()}${Math.floor(Math.random() * 1000)}`;
+}
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -31,7 +35,10 @@ const upload = multer({ storage });
 
 // Registrar equipamento
 app.post("/equipamentos", upload.single("foto"), (req, res) => {
-  const { nome, equipamento, modelo, fabricante, tagid, serial } = req.body;
+  let { nome, equipamento, modelo, fabricante, tagid, serial } = req.body;
+  if (!tagid) {
+    tagid = generateTagId();
+  }
   const foto = req.file ? `/uploads/${req.file.filename}` : null;
   const dataEntrada = new Date().toISOString();
 
