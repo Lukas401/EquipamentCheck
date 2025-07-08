@@ -103,7 +103,7 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Tag ID</label>
-                <input type="text" class="form-control" id="tagid" readonly disabled required />
+                <input type="text" class="form-control" id="tagid" readonly disabled required placeholder="Tag Id será gerada ao finalizar!" />
             </div>
 
             <div class="col-md-4">
@@ -142,9 +142,12 @@
         const equipSelect = document.getElementById('equipamento');
         const extraFields = document.getElementById('extraFields');
         equipSelect.addEventListener('change', () => {
+
             extraFields.style.display = '';
             extraFields.querySelectorAll('input, button').forEach(el => el.disabled = false);
-            fetch(`https://equipamentcheck.onrender.com/next-tagid/${encodeURIComponent(equipSelect.value)}`)
+
+
+            fetch(`/next-tag/${encodeURIComponent(equipSelect.value)}`)
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('tagid').value = data.tagid;
@@ -165,7 +168,7 @@
             formData.append('equipamento', document.getElementById('equipamento').value);
             formData.append('modelo', document.getElementById('modelo').value);
             formData.append('fabricante', document.getElementById('fabricante').value);
-            formData.append('tagid', document.getElementById('tagid').value);
+            //formData.append('tagid', document.getElementById('tagid').value);
             formData.append('serial', document.getElementById('serial').value);
 
             const fileInput = document.getElementById('foto');
@@ -173,7 +176,7 @@
                 formData.append('foto', fileInput.files[0]);
             }
 
-            fetch('https://equipamentcheck.onrender.com/equipamentos', {
+            fetch('/equipamentos', {
                 method: 'POST',
                 body: formData
             })
@@ -206,6 +209,7 @@
 
                     gerarQRCode(data.tagid);
                     document.getElementById('equipmentForm').reset();
+                    document.getElementById('tagid').value = data.tagid
                 })
                 .catch((err) => {
                     Swal.fire({

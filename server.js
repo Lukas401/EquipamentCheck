@@ -52,67 +52,81 @@ const PREFIXES = {
   Outros: 'OT',
 };
 
-app.get('/next-tagid/:equipamento', (req, res) => {
-  const equipamento = req.params.equipamento;
-  const prefix = PREFIXES[equipamento] || equipamento.slice(0, 2).toUpperCase();
-  const sql =
-    'SELECT tagid FROM equipamentos WHERE tagid LIKE ? ORDER BY id DESC LIMIT 1';
-  db.get(sql, [prefix + '%'], (err, row) => {
-    if (err) return res.status(500).json({ error: 'Erro ao consultar banco' });
-    let next = 1;
-    if (row && row.tagid) {
-      const n = parseInt(row.tagid.slice(prefix.length), 10);
-      if (!isNaN(n)) next = n + 1;
-    }
-    const tagid = prefix + String(next).padStart(3, '0');
-    res.json({ tagid });
-  });
-});
 
 // Registrar equipamento
 app.post("/equipamentos", upload.single("foto"), (req, res) => {
-  const { nome, equipamento, modelo, fabricante, tagid, serial } = req.body;
-  const foto = req.file ? `/uploads/${req.file.filename}` : null;
-  const dataEntrada = new Date().toISOString();
+  let { nome, equipamento, modelo, fabricante, serial, tagid } = req.body;
 
-  const sql = `
-    INSERT INTO equipamentos (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada, foto, serial)
-    VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?, ?)
-  `;
+  // Se o front não enviou tagid (payload vazio), gera automaticamente pela regra prefix + número
+  if (!tagid) {
+    const prefix = PREFIXES[equipamento] || equipamento.slice(0, 2).toUpperCase();
+    db.get(
+      `SELECT tagid FROM equipamentos WHERE tagid LIKE ? ORDER BY id DESC LIMIT 1`,
+      [prefix + '%'],
+      (err, row) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Erro ao gerar Tag ID' });
+        }
+        let nextNum = 1;
+        if (row && row.tagid) {
+          const n = parseInt(row.tagid.slice(prefix.length), 10);
+          if (!isNaN(n)) nextNum = n + 1;
+        }
+        tagid = prefix + String(nextNum).padStart(3, '0');
+        // só depois de montar o tagid chama "persistir()"
+        persistir();
+      }
+    );
+  } else {
+    // Foi recebido tagid manualmente (ex.: via /next-tagid), pode inserir direto:
+    persistir();
+  }
 
-  db.run(
-    sql,
-    [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto, serial],
-    function (err) {
-      if (err) {
-        console.error("Erro ao inserir no banco:", err.message);
+  // Extrai toda a lógica de inserir para dentro de uma função
+  function persistir() {
+    const foto = req.file ? `/uploads/${req.file.filename}` : null;
+    const dataEntrada = new Date().toISOString();
+    const sql = `
+      INSERT INTO equipamentos 
+        (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada, foto, serial)
+      VALUES (?, ?, ?, ?, ?, 'Entrada', ?, ?, ?)
+    `;
 
-        // Tratamento específico para erro de chave duplicada
-        if (err.message.includes("UNIQUE constraint failed: equipamentos.tagid")) {
-          return res.status(400).json({
-            error: "Tag ID já está em uso. Use um identificador único.",
+    db.run(
+      sql,
+      [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto, serial],
+      function (err) {
+        if (err) {
+          console.error("Erro ao inserir no banco:", err.message);
+
+          // Tratamento específico para erro de chave duplicada
+          if (err.message.includes("UNIQUE constraint failed: equipamentos.tagid")) {
+            return res.status(400).json({
+              error: "Tag ID já está em uso. Use um identificador único.",
+            });
+          }
+
+          // Tratamento para outros erros
+          return res.status(500).json({
+            error: "Erro ao inserir equipamento: " + err.message,
           });
         }
 
-        // Tratamento para outros erros
-        return res.status(500).json({
-          error: "Erro ao inserir equipamento: " + err.message,
+        // Caso não ocorra erro, retorna os dados inseridos
+        res.status(201).json({
+          id: this.lastID,
+          tagid,
+          nome,
+          equipamento,
+          modelo,
+          fabricante,
+          foto,
+          serial,
         });
       }
-
-      // Caso não ocorra erro, retorna os dados inseridos
-      res.status(201).json({
-        id: this.lastID,
-        tagid,
-        nome,
-        equipamento,
-        modelo,
-        fabricante,
-        foto,
-        serial,
-      });
-    }
-  );
+    );
+  }
 });
 
 // Consultar equipamento por Tag ID
@@ -125,6 +139,24 @@ app.get("/equipamentos/:tagid", (req, res) => {
     res.json(row);
   });
 });
+
+app.get('/next-tag/:tipo', (req, res) => {
+  const tipo = req.params.tipo;
+  const prefix = PREFIXES[tipo] || tipo.slice(0, 2).toUpperCase();
+  const sql = 'SELECT tagid FROM equipamentos WHERE tagid LIKE ? ORDER BY id DESC LIMIT 1';
+  db.get(sql, [prefix + '%'], (err, row) => {
+    if (err) return res.status(500).json({ error: 'Erro ao consultar banco' });
+    let nextNumber = 1;
+    if (row && row.tagid) {
+      const lastNum = parseInt(row.tagid.slice(prefix.length), 10);
+      if (!isNaN(lastNum)) nextNumber = lastNum + 1;
+    }
+    const newTag = prefix + String(nextNumber).padStart(3, '0');
+    // *** retorna sempre como `tagid` ***
+    return res.json({ tagid: newTag });
+  });
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
