@@ -64,10 +64,6 @@ cd EquipamentCheck
 npm install
 npm start
 
-Front-end: http://localhost:3000/index.html
-
-Consulta/baixa: http://localhost:3000/consulta.html
-
 🔧 Ambiente e Deploy
 
 SQLite local para testes. Em produção, considere migrar para SQL Server ou PostgreSQL.
