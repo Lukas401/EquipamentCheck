@@ -26,11 +26,29 @@
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .btn-impr:hover {
             background-color: #e0e0e0;
         }
-        
+
+        @media print {
+            body * {
+                visbility: hidden;
+            }
+
+            #qrcode,
+            #qrcode * {
+                visibity: visible;
+            }
+
+            #qrcode {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        }
     </style>
+
 
 </head>
 
@@ -93,49 +111,52 @@
                 </select>
             </div>
             <div id="extraFields" style="display:none;" class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Modelo</label>
-                <input type="text" class="form-control" id="modelo" disabled required />
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Fabricante</label>
-                <input type="text" class="form-control" id="fabricante" disabled required />
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Tag ID</label>
-                <input type="text" class="form-control" id="tagid" readonly disabled required placeholder="Tag Id será gerada ao finalizar!" />
-            </div>
+                <div class="col-md-4">
+                    <label class="form-label">Modelo</label>
+                    <input type="text" class="form-control" id="modelo" disabled required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Fabricante</label>
+                    <input type="text" class="form-control" id="fabricante" disabled required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tag ID</label>
+                    <input type="text" class="form-control" id="tagid" readonly disabled required
+                        placeholder="Tag Id será gerada ao finalizar!" />
+                </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Serial</label>
-                <input type="text" class="form-control" id="serial" placeholder="Digite o serial do EQUIPAMENTO"
-                    disabled required />
-            </div>
+                <div class="col-md-4">
+                    <label class="form-label">Serial</label>
+                    <input type="text" class="form-control" id="serial" placeholder="Digite o serial do EQUIPAMENTO"
+                        disabled required />
+                </div>
 
-            <div class="col-md4">
-                <label for="form-label" for="foto">Foto do equipamento</label>
-                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" disabled required />
-            </div>
+                <div class="col-md4">
+                    <label for="form-label" for="foto">Foto do equipamento</label>
+                    <input type="file" class="form-control" id="foto" name="foto" accept="image/*" disabled required />
+                </div>
 
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary" disabled>Registrar Entrada</button>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary" disabled>Registrar Entrada</button>
 
-            </div>
+                </div>
             </div>
 
         </form>
 
         <hr class="my-4" />
 
-        <h4>QR Code do Equipamento</h4>
 
+        <h4>QR Code do Equipamento</h4>
 
         <canvas id="qrcode"></canvas>
 
-                        <button class="btn-impr" type="button" onclick="window.print()">
-                    <span class="material-symbols-outlined">print</span>
-                </button>
+       <button id="btnPrint" class="btn-impr" type="button" onclick="window.print()" style="display: none;">
+            <span class="material-symbols-outlined">print</span>
+            
+        </button>
     </div>
+
 
 
     <script>
@@ -207,19 +228,45 @@
                         text: "Equipamento registrado com sucesso!"
                     });
 
+
+
                     gerarQRCode(data.tagid);
                     document.getElementById('equipmentForm').reset();
                     document.getElementById('tagid').value = data.tagid
+
+                    document.getElementById('btnPrint').style.display = 'inline-block';
+
+                    document.getElementById('equipmentForm').reset();
+                    document.getElementById('tagid').value = data.tagid;
+
+                    document.getElementById('btnPrint').addEventListener('click', () => {
+                        const qrCanvas = document.getElementById('qrcode');
+                        const dataUrl = qrCanvas.toDataURL();
+
+                        const w = window.open('', '_blank', 'width=300, height=300');
+                        w.document.write(`
+                           <html><head><title>Imprimir QR Code</title></head>
+                           <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;">
+                           <img src="${dataUrl}" />
+                            </body></html>
+                         `);
+                        w.document.close();
+                        w.focus();
+                        w.print();
+                        w.close();
+                    })
                 })
-                .catch((err) => {
+
+                .catch(err => {
                     Swal.fire({
                         icon: "error",
                         title: "Erro de conexão",
                         text: err.message || "Erro desconhecido."
                     });
-
                 })
                 .finally(() => {
+                    // retira spinner
+                    const button = document.querySelector('button[type="submit"]');
                     button.disabled = false;
                     button.innerHTML = originalText;
                 });

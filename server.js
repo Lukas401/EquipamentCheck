@@ -79,7 +79,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
       }
     );
   } else {
-    // Foi recebido tagid manualmente (ex.: via /next-tagid), pode inserir direto:
+    
     persistir();
   }
 
