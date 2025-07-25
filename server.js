@@ -87,7 +87,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
   // Extrai toda a lógica de inserir para dentro de uma função
   function persistir() {
     const foto = req.file ? `/uploads/${req.file.filename}` : null;
-    const dataEntrada = new Date().toISOString();
+    const dataEntrada = new Date().toString();
     const sql = `
       INSERT INTO equipamentos 
         (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada, foto, serial)

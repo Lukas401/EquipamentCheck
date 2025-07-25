@@ -50,11 +50,15 @@
                     QR Code
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
+
+            <!-- Código de Barras em Manutenção-->
+           <!-- <li class="nav-item" role="presentation">
                 <button class="nav-link" id="barcode-tab" data-bs-toggle="tab" data-bs-target="#barcode-pane"
                     type="button" role="tab">
                     Código de Barras
-                </button>
+                </button>-->
+
+
             </li>
         </ul>
 
@@ -79,12 +83,13 @@
                 </button>
             </div>
 
-            <!-- 3) Código de Barras -->
+            <!-- 3) Código de Barras em Manutenção
             <div class="tab-pane fade" id="barcode-pane" role="tabpanel" aria-labelledby="barcode-tab">
                 <div id="barcodeReader" style="width:100%; max-width:500px;"></div>
                 <button class="btn btn-sm btn-outline-secondary mt-2" onclick="stopBarcodeScan()">
                     Parar Scanner
                 </button>
+                -->
             </div>
 
         </div>
@@ -124,10 +129,12 @@
           <strong>Foto:</strong><br/>
           <img src="${resultado.foto}" alt="Foto" class="img-fluid mb-2"/><br/>
           <strong>QR Code:</strong><br/>
-          <canvas id="qrcodeConsulta"></canvas><br/>
-          <strong>Código de Barras:</strong><br/>
-          <svg id="barcodeConsulta"></svg>
-                    `;
+          <canvas id="qrcodeConsulta"></canvas><br/>       `
+                    
+                        //função de gerar código de barras em manutenção
+                    //<strong>Código de Barras:</strong><br/>
+                     //<svg id="barcodeConsulta"></svg>
+                    ;
 
                         new QRious({
                             element: d = document.getElementById('qrcodeConsulta'),
@@ -135,12 +142,12 @@
                             size: 200
                         });
 
-                        JsBarcode("#barcodeConsulta", tag, {
+                       /* JsBarcode("#barcodeConsulta", tag, {
                             format: "CODE128",
                             width: 2,
                             height: 50,
                             displayValue: true
-                        });
+                        });*/
                     }
                 })
                 .catch(err => {
@@ -173,7 +180,7 @@
             html5qrcodeScanner && html5qrcodeScanner.stop();
         }
 
-        //Barcode Scanner 
+        /*Barcode Scanner --Função recebimento do código de barras em manutenção
         function startBarcodeScan() {
             Quagga.init({
                 inputStream: {
@@ -196,10 +203,12 @@
                 consultaPorTag(code);
                 new bootstrap.Tab(document.querySelector('#manual-tab')).show();
             });
-        }
+        } 
+
+
         function stopBarcodeScan() {
             Quagga.stop();
-        }
+        }*/
 
 
         //Movimentação ao trocar de abas
@@ -218,7 +227,7 @@
                 });
         });
 
-        
+
     </script>
 
 </body>
