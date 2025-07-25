@@ -19,35 +19,20 @@ Geração automática de TAGID único (prefixo + sequência 3 dígitos):
 
 Persistência no banco SQLite (equipamentos.db), tabela equipamentos:
 
-CREATE TABLE IF NOT EXISTS equipamentos (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  nome TEXT,
-  equipamento TEXT,
-  modelo TEXT,
-  fabricante TEXT,
-  tagid TEXT UNIQUE,
-  status TEXT,
-  dataEntrada TEXT,
-  foto TEXT,
-  serial TEXT,
-  ativo INTEGER DEFAULT 1
-);
-
 API REST:
 
-*POST /equipamentos → registra novo equipamento (gera tagid se não enviado)*
-*GET /equipamentos/:tagid → consulta equipamento ativo (filtra ativo = 1)*
-*PATCH /equipamentos/:tagid/baixa → marca como baixa (status='Baixa' e ativo=0)*
+ registra novo equipamento (gera tagid se não enviado)*
+ consulta equipamento ativo (filtra ativo = 1)*
+ marca como baixa (status='Baixa' e ativo=0)*
 
-Interface de Consulta (consulta.html) com abas:
+Interface de Consulta com abas:
 
 *Manual: pesquisa via input de Tag ID*
-*QR Code: leitura por câmera (html5-qrcode)*
-*Código de Barras: leitura por câmera (Quagga)*
+*QR Code: leitura por câmera*
 
-Geradores pós-consulta:
+
+Gerador pós-consulta:
 *QR Code (QRious)*
-*Código de Barras (JsBarcode)*
 
 Baixa de Equipamento:
 *Botão na tela de consulta que chama PATCH /equipamentos/:tagid/baixa*
@@ -66,13 +51,13 @@ npm start
 
 🔧 Ambiente e Deploy
 
-SQLite local para testes. Em produção, considere migrar para SQL Server ou PostgreSQL.
+SQLite local para testes. Em produção, migrar para SQL Server ou PostgreSQL.
 
-Deploy Irei finalizar por enquanto no: Render.com 
+Deploy Irei finalizar. Por enquanto no: Render.com 
 
 📌 Futuras Evoluções
 
-Migração para SQL Server (via driver mssql ou ORM knex)
+Migração para SQL Server 
 
 Autenticação e autorização de usuários
 
