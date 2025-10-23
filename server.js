@@ -7,6 +7,7 @@ const multer = require("multer");
 const fs = require("fs");
 const app = express();
 
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -79,14 +80,14 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
       }
     );
   } else {
-    // Foi recebido tagid manualmente (ex.: via /next-tagid), pode inserir direto:
+    
     persistir();
   }
 
   // Extrai toda a lógica de inserir para dentro de uma função
   function persistir() {
     const foto = req.file ? `/uploads/${req.file.filename}` : null;
-    const dataEntrada = new Date().toISOString();
+    const dataEntrada = new Date().toString();
     const sql = `
       INSERT INTO equipamentos 
         (nome, equipamento, modelo, fabricante, tagid, status, dataEntrada, foto, serial)

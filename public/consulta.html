@@ -50,11 +50,15 @@
                     QR Code
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
+
+            <!-- Código de Barras em Manutenção-->
+           <!-- <li class="nav-item" role="presentation">
                 <button class="nav-link" id="barcode-tab" data-bs-toggle="tab" data-bs-target="#barcode-pane"
                     type="button" role="tab">
                     Código de Barras
-                </button>
+                </button>-->
+
+
             </li>
         </ul>
 
@@ -79,12 +83,13 @@
                 </button>
             </div>
 
-            <!-- 3) Código de Barras -->
+            <!-- 3) Código de Barras em Manutenção
             <div class="tab-pane fade" id="barcode-pane" role="tabpanel" aria-labelledby="barcode-tab">
                 <div id="barcodeReader" style="width:100%; max-width:500px;"></div>
                 <button class="btn btn-sm btn-outline-secondary mt-2" onclick="stopBarcodeScan()">
                     Parar Scanner
                 </button>
+                -->
             </div>
 
         </div>
@@ -135,38 +140,6 @@
           <strong>Código de Barras:</strong><br/>
           <svg id="barcodeConsulta"></svg>
                     `;
-                        //MOSTRAR O BOTÃO DE DAR BAIXA
-                        const btn = document.getElementById('btnBaixa');
-                        btn.style.display = 'inline-block';
-                    }
-                    div.classList.remove('d-none');
-                })
-                .catch(err => {
-                    div.innerHTML = `<div class="text-danger">Erro na consulta: ${err.message}</div>`;
-                    document.getElementById('btnBaixa').style.display = 'none';
-                    div.classList.remove('d-none');
-                });
-        }
-
-        function darBaixa() {
-            if (!equipamentoAtual) return;
-            fetch(`/equipamentos/${encodeURIComponent(equipamentoAtual.tagId)}/baixa`, {
-                method: 'PATCH'
-            })
-                .then(res => res.json().then(json => ({ status: res.status, body: json })))
-                .then(({ status, body }) => {
-                    if (status === 200) {
-                        Swal.fire('Sucesso!', body.message, 'success');
-                        //Atualiza status na tela (pop-up)
-                        consultaPorTag(equipamentoAtual.tagid);
-                    } else {
-                        Swal.fire('Erro!', body.error, 'error');
-                    }
-                })
-                .catch(err => {
-                    Swal.fire('Erro de conexão', err.message, 'error');
-                });
-        }
 
         new QRious({
             element: d = document.getElementById('qrcodeConsulta'),
@@ -174,12 +147,19 @@
             size: 200
         });
 
-        JsBarcode("#barcodeConsulta", tag, {
-            format: "CODE128",
-            width: 2,
-            height: 50,
-            displayValue: true
-        });
+                        JsBarcode("#barcodeConsulta", tag, {
+                            format: "CODE128",
+                            width: 2,
+                            height: 50,
+                            displayValue: true
+                        });
+                    }
+                })
+                .catch(err => {
+                    div.classList.remove('d-none');
+                    div.innerHTML = `<div class="text-danger"> Erro na consulta: ${err.message}</div>`;
+                });
+        }
 
         //Qr Code Scanner
         let html5qrcodeScanner;
@@ -205,7 +185,7 @@
             html5qrcodeScanner && html5qrcodeScanner.stop();
         }
 
-        //Barcode Scanner 
+        /*Barcode Scanner --Função recebimento do código de barras em manutenção
         function startBarcodeScan() {
             Quagga.init({
                 inputStream: {
@@ -228,10 +208,12 @@
                 consultaPorTag(code);
                 new bootstrap.Tab(document.querySelector('#manual-tab')).show();
             });
-        }
+        } 
+
+
         function stopBarcodeScan() {
             Quagga.stop();
-        }
+        }*/
 
 
         //Movimentação ao trocar de abas
@@ -250,11 +232,7 @@
                 });
         });
 
-
-
-
-
-
+        
     </script>
 
 </body>
