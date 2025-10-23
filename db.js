@@ -14,7 +14,8 @@ db.serialize(() => {
       dataEntrada TEXT,
       foto TEXT,
       serial TEXT
-    )
+      ativo INTEGER NOT NULL DEFAULT 1
+    )    
   `);
 });
 

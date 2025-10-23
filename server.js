@@ -135,7 +135,7 @@ app.get("/equipamentos/:tagid", (req, res) => {
   db.get("SELECT * FROM equipamentos WHERE tagid = ?", [tagid], (err, row) => {
     if (err) return res.status(500).json({ error: "Erro interno" });
     if (!row)
-      return res.status(404).json({ error: "Equipamento não encontrado" });
+      return res.status(404).json({ error: "Equipamento não encontrado ou já baixado" });
     res.json(row);
   });
 });
@@ -157,8 +157,31 @@ app.get('/next-tag/:tipo', (req, res) => {
   });
 });
 
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Servidor rodando em http://localhost:${PORT}`)
 );
+
+app.patch('/equipamentos/:tagi/baixa', (req, res) => {
+  const { tagid } = req.params;
+  const sql = `
+    UPDATE equipamentos
+    Set status = 'Baixa',
+        ativo = 0
+        WHERE tagid = ?
+        AND ativo = 1
+    `;
+  db.run(sql, [tagid], function (err) {
+    if (err) {
+      console.error('Erro na baixa de equipamento', err.message);
+      return res.status(500).json({ error: 'Erro interno ao dar baixa' });
+    }
+    if (this.changes === 0) {
+      //Se nenhuma linha for atualizada já estava baixado ou não existia 
+      return res
+        .status(404)
+        .json({ error: 'Equipamento não encontrado ou já efetuado a baixa' });
+    }
+    res.json({ message: 'Equipamento baixado com Sucesso!' });
+  });
+});
