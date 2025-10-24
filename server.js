@@ -183,6 +183,6 @@ app.patch('/equipamentos/:tagi/baixa', (req, res) => {
         .status(404)
         .json({ error: 'Equipamento não encontrado ou já efetuado a baixa' });
     }
-    res.json({ message: 'Equipamento baixado com Sucesso!' });
+    res.json({ message: 'Realizado a baixa do equipamento com sucesso!' });
   });
 });
