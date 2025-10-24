@@ -99,7 +99,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
       [nome, equipamento, modelo, fabricante, tagid, dataEntrada, foto, serial],
       function (err) {
         if (err) {
-          console.error("Erro ao inserir no banco:", err.message);
+          console.error("Erro ao inserir no banco: ", err.message);
 
           // Tratamento específico para erro de chave duplicada
           if (err.message.includes("UNIQUE constraint failed: equipamentos.tagid")) {
@@ -134,7 +134,7 @@ app.post("/equipamentos", upload.single("foto"), (req, res) => {
 app.get("/equipamentos/:tagid", (req, res) => {
   const tagid = req.params.tagid;
   db.get("SELECT * FROM equipamentos WHERE tagid = ?", [tagid], (err, row) => {
-    if (err) return res.status(500).json({ error: "Erro interno" });
+    if (err) return res.status(500).json({ error: "Erro interno " });
     if (!row)
       return res.status(404).json({ error: "Equipamento não encontrado ou já baixado" });
     res.json(row);
